@@ -1,0 +1,1844 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bank Sampah Lestari — Kelurahan Airmadidi</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @media print {
+      .no-print { display: none !important; }
+      body { background: white !important; }
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans">
+
+  <!-- NAVBAR -->
+  <header class="bg-emerald-700 text-white shadow-md no-print">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-2">
+      <div class="flex items-center gap-3">
+        <div class="bg-white text-emerald-700 font-extrabold rounded-lg w-10 h-10 flex items-center justify-center text-lg shadow">BSL</div>
+        <div>
+          <h1 class="font-bold text-lg leading-tight">Bank Sampah Lestari</h1>
+          <p class="text-xs text-emerald-100">Kelurahan Airmadidi · Sistem Informasi Tabungan Sampah</p>
+        </div>
+      </div>
+      <div id="navUserArea" class="hidden flex flex-wrap items-center gap-2">
+        <span id="navUserInfo" class="text-xs sm:text-sm bg-emerald-800 px-3 py-1.5 rounded-full font-medium"></span>
+        <button onclick="resetDemoData()" class="text-xs bg-amber-500 hover:bg-amber-600 text-white px-2.5 py-1.5 rounded font-semibold">Reset Data</button>
+        <button onclick="logout()" class="text-xs bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded font-semibold">Keluar</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="flex-grow max-w-6xl w-full mx-auto px-4 py-6">
+
+    <!-- ==================== AUTH VIEW (LOGIN & REGISTER) ==================== -->
+    <section id="authView" class="max-w-lg mx-auto bg-white rounded-2xl shadow-md border border-slate-200 overflow-hidden mt-2">
+      <div class="grid grid-cols-2 border-b border-slate-200 bg-slate-100 text-sm font-bold">
+        <button id="btnTabLogin" onclick="switchAuthTab('login')" class="py-3 text-center bg-white text-emerald-700 border-b-2 border-emerald-600">
+          Masuk (Login)
+        </button>
+        <button id="btnTabRegister" onclick="switchAuthTab('register')" class="py-3 text-center text-slate-500 hover:text-slate-700">
+          Daftar Nasabah (Register)
+        </button>
+      </div>
+
+      <div class="p-6">
+        <div id="authAlert" class="hidden text-sm px-3.5 py-2.5 rounded-lg mb-4"></div>
+
+        <!-- FORM LOGIN -->
+        <form id="formLogin" onsubmit="handleLogin(event)" class="space-y-4">
+          <div class="text-center mb-2">
+            <h2 class="text-lg font-bold text-slate-800">Masuk ke Akun Anda</h2>
+            <p class="text-xs text-slate-500">Gunakan Username Pengurus atau Nomor Buku / No. HP Nasabah</p>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Username / Nomor Buku / No. HP</label>
+            <input id="loginIdentifier" type="text" required placeholder="Contoh: ketua atau BS-001"
+              class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Kata Sandi / PIN</label>
+            <input id="loginPassword" type="password" required placeholder="Masukkan kata sandi"
+              class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+          </div>
+          <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-lg transition shadow-sm">
+            Masuk Sistem
+          </button>
+
+          <!-- Akun Uji Cepat -->
+          <div class="pt-4 border-t border-slate-200">
+            <p class="text-xs font-semibold text-slate-600 mb-2">Isi Otomatis Akun Uji (Per Aktor):</p>
+            <div class="grid grid-cols-2 gap-2 text-xs">
+              <button type="button" onclick="fillLogin('ketua', 'ketua123')" class="p-2 border border-slate-200 rounded-lg hover:bg-emerald-50 text-left">
+                <span class="font-bold text-emerald-700 block">Ketua</span>
+                <span class="text-slate-500">Ibu Meiske (ketua)</span>
+              </button>
+              <button type="button" onclick="fillLogin('petugas', 'petugas123')" class="p-2 border border-slate-200 rounded-lg hover:bg-blue-50 text-left">
+                <span class="font-bold text-blue-700 block">Petugas Timbang</span>
+                <span class="text-slate-500">Pak Yopi (petugas)</span>
+              </button>
+              <button type="button" onclick="fillLogin('bendahara', 'bendahara123')" class="p-2 border border-slate-200 rounded-lg hover:bg-purple-50 text-left">
+                <span class="font-bold text-purple-700 block">Bendahara</span>
+                <span class="text-slate-500">Ibu Sintia (bendahara)</span>
+              </button>
+              <button type="button" onclick="fillLogin('BS-001', '123456')" class="p-2 border border-slate-200 rounded-lg hover:bg-amber-50 text-left">
+                <span class="font-bold text-amber-700 block">Nasabah</span>
+                <span class="text-slate-500">Maria Kaligis (BS-001)</span>
+              </button>
+            </div>
+          </div>
+        </form>
+
+        <!-- FORM REGISTER NASABAH MANDIRI -->
+        <form id="formRegister" onsubmit="handleRegister(event)" class="hidden space-y-3.5">
+          <div class="text-center mb-2">
+            <h2 class="text-lg font-bold text-slate-800">Pendaftaran Nasabah Baru</h2>
+            <p class="text-xs text-slate-500">Warga Kelurahan Airmadidi dapat mendaftar mandiri untuk mendapat Nomor Buku Tabungan Digital</p>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Lengkap Kepala Keluarga / Warga</label>
+            <input id="regNama" type="text" required placeholder="Contoh: Stevanus Pangemanan"
+              class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Nomor HP (WhatsApp)</label>
+            <input id="regHp" type="text" required placeholder="Contoh: 08124400999"
+              class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Alamat / Lingkungan (Kel. Airmadidi)</label>
+            <input id="regAlamat" type="text" required placeholder="Contoh: Lingkungan III, Kel. Airmadidi"
+              class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Buat Kata Sandi / PIN Login</label>
+            <input id="regPassword" type="password" minlength="4" required placeholder="Minimal 4 karakter"
+              class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+          </div>
+          <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-lg transition shadow-sm">
+            Daftar & Buat Buku Tabungan
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <!-- ==================== APP DASHBOARD CONTAINER ==================== -->
+    <section id="appView" class="hidden space-y-6">
+      <div id="roleTabs" class="flex flex-wrap gap-2 border-b border-slate-200 pb-3 no-print"></div>
+      <div id="tabContent"></div>
+    </section>
+
+  </main>
+
+  <footer class="bg-slate-100 border-t border-slate-200 py-3 text-center text-xs text-slate-500 no-print">
+    Bank Sampah Lestari · Kelurahan Airmadidi · Tim 9 (YTTA) — Sistem Informasi Tabungan Sampah
+  </footer>
+
+  <!-- JAVASCRIPT FULL BUSINESS LOGIC -->
+  <script>
+    // ==================== 1. DATABASE INITIALIZATION (LOCALSTORAGE) ====================
+    const DEFAULT_STATE = {
+      users: [
+        { id: 1, nama: 'Ibu Meiske Rondonuwu', username: 'ketua', password: 'ketua123', role: 'Ketua', aktif: true },
+        { id: 2, nama: 'Pak Yopi', username: 'petugas', password: 'petugas123', role: 'Petugas Timbang', aktif: true },
+        { id: 3, nama: 'Ibu Lina', username: 'lina', password: 'petugas123', role: 'Petugas Timbang', aktif: true },
+        { id: 4, nama: 'Ibu Sintia', username: 'bendahara', password: 'bendahara123', role: 'Bendahara', aktif: true }
+      ],
+      nasabah: [
+        { id: 1, nomor_buku: 'BS-001', nama: 'Maria Kaligis', no_hp: '08124400111', alamat: 'Lingkungan I, Airmadidi', password: '123456', saldo_awal: 25000, aktif: true },
+        { id: 2, nomor_buku: 'BS-002', nama: 'Hendra Tombokan', no_hp: '08124400222', alamat: 'Lingkungan II, Airmadidi', password: '123456', saldo_awal: 15000, aktif: true },
+        { id: 3, nomor_buku: 'BS-003', nama: 'Grace Lengkong', no_hp: '08124400333', alamat: 'Lingkungan IV, Airmadidi', password: '123456', saldo_awal: 0, aktif: true }
+      ],
+      jenis_sampah: [
+        { id: 1, nama: 'Botol Plastik', aktif: true },
+        { id: 2, nama: 'Plastik Campur', aktif: true },
+        { id: 3, nama: 'Kardus', aktif: true },
+        { id: 4, nama: 'Kertas', aktif: true },
+        { id: 5, nama: 'Besi', aktif: true },
+        { id: 6, nama: 'Aluminium', aktif: true },
+        { id: 7, nama: 'Botol Kaca', aktif: true }
+      ],
+      harga_bulanan: {
+        '2026-10': { 1: 3000, 2: 1200, 3: 1800, 4: 1500, 5: 3500, 6: 9000, 7: 800 },
+        '2026-11': { 1: 2500, 2: 1000, 3: 1700, 4: 1500, 5: 3500, 6: 9500, 7: 800 },
+        '2026-12': { 1: 2500, 2: 1000, 3: 1700, 4: 1500, 5: 3500, 6: 9500, 7: 800 }
+      },
+      setoran: [
+        {
+          id: 'STR-1001',
+          id_nasabah: 1,
+          petugas: 'Pak Yopi',
+          tanggal: '2026-11-07T08:30:00',
+          bulan: '2026-11',
+          items: [
+            { id_jenis: 1, nama_jenis: 'Botol Plastik', berat: 10, harga: 2500, subtotal: 25000 },
+            { id_jenis: 3, nama_jenis: 'Kardus', berat: 15, harga: 1700, subtotal: 25500 }
+          ],
+          bruto: 50500,
+          kas_10: 5050,
+          netto_90: 45450,
+          dikoreksi: false,
+          alasan_koreksi: ''
+        },
+        {
+          id: 'STR-1002',
+          id_nasabah: 2,
+          petugas: 'Ibu Lina',
+          tanggal: '2026-11-14T09:10:00',
+          bulan: '2026-11',
+          items: [
+            { id_jenis: 6, nama_jenis: 'Aluminium', berat: 5, harga: 9500, subtotal: 47500 }
+          ],
+          bruto: 47500,
+          kas_10: 4750,
+          netto_90: 42750,
+          dikoreksi: false,
+          alasan_koreksi: ''
+        }
+      ],
+      penarikan: [
+        {
+          id: 'TRK-2001',
+          id_nasabah: 2,
+          bendahara: 'Ibu Sintia',
+          tanggal: '2026-10-24T10:00:00',
+          bulan: '2026-10',
+          jumlah: 50000,
+          sumber: 'Langsung',
+          dikoreksi: false,
+          alasan_koreksi: ''
+        }
+      ],
+      // Pengajuan Penarikan Mandiri dari Nasabah -> Menunggu Konfirmasi Bendahara (Ibu Sintia)
+      pengajuan_tarik: [
+        {
+          id: 'REQ-5001',
+          id_nasabah: 1,
+          tanggal_pengajuan: '2026-11-16T18:30:00',
+          tanggal_rencana_ambil: '2026-11-21',
+          bulan: '2026-11',
+          jumlah: 55000,
+          catatan_nasabah: 'Ambil tunai hari Sabtu di balai kelurahan',
+          status: 'Menunggu Konfirmasi', // 'Menunggu Konfirmasi' | 'Disetujui' | 'Ditolak'
+          diproses_oleh: '',
+          tanggal_proses: '',
+          alasan_tolak: ''
+        }
+      ],
+      penjualan: [
+        {
+          id: 'PJL-3001',
+          tanggal: '2026-11-14T13:00:00',
+          bulan: '2026-11',
+          ketua: 'Ibu Meiske Rondonuwu',
+          items: [
+            { id_jenis: 1, nama_jenis: 'Botol Plastik', berat_catatan: 6, berat_pengepul: 5.7, susut: 0.3 }
+          ]
+        }
+      ]
+    };
+
+    let state = JSON.parse(localStorage.getItem('bsl_system_v3')) || JSON.parse(JSON.stringify(DEFAULT_STATE));
+    let currentUser = JSON.parse(sessionStorage.getItem('bsl_current_user_v3')) || null;
+    let activeTab = '';
+
+    function saveState() {
+      localStorage.setItem('bsl_system_v3', JSON.stringify(state));
+    }
+
+    function resetDemoData() {
+      if (confirm('Kembalikan seluruh data ke kondisi awal demo?')) {
+        state = JSON.parse(JSON.stringify(DEFAULT_STATE));
+        saveState();
+        renderApp();
+      }
+    }
+
+    // ==================== 2. CORE BUSINESS RULES & VALIDATIONS ====================
+    function formatRp(num) {
+      return 'Rp ' + Math.round(num).toLocaleString('id-ID');
+    }
+
+    function getCurrentMonth() {
+      return '2026-11';
+    }
+
+    function generateNomorBuku() {
+      const nextNum = state.nasabah.length + 1;
+      return 'BS-' + String(nextNum).padStart(3, '0');
+    }
+
+    // Saldo fisik nasabah = Saldo Awal + Total Setor Netto (90%) - Total Penarikan Disetujui/Sah
+    function hitungSaldoNasabah(idNasabah) {
+      const n = state.nasabah.find(x => x.id === idNasabah);
+      if (!n) return 0;
+      const totalSetor = state.setoran
+        .filter(s => s.id_nasabah === idNasabah && !s.dikoreksi)
+        .reduce((acc, s) => acc + s.netto_90, 0);
+      const totalTarik = state.penarikan
+        .filter(t => t.id_nasabah === idNasabah && !t.dikoreksi)
+        .reduce((acc, t) => acc + t.jumlah, 0);
+      return n.saldo_awal + totalSetor - totalTarik;
+    }
+
+    // Saldo yang sedang tertahan (pending) oleh pengajuan pencairan nasabah
+    function hitungSaldoTertahan(idNasabah) {
+      return state.pengajuan_tarik
+        .filter(r => r.id_nasabah === idNasabah && r.status === 'Menunggu Konfirmasi')
+        .reduce((acc, r) => acc + r.jumlah, 0);
+    }
+
+    function hitungTotalKas(bulanFilter = '') {
+      return state.setoran
+        .filter(s => !s.dikoreksi && (!bulanFilter || s.bulan === bulanFilter))
+        .reduce((acc, s) => acc + s.kas_10, 0);
+    }
+
+    function hitungStokGudang() {
+      return state.jenis_sampah.map(j => {
+        const masuk = state.setoran
+          .filter(s => !s.dikoreksi)
+          .flatMap(s => s.items)
+          .filter(i => i.id_jenis === j.id)
+          .reduce((acc, i) => acc + i.berat, 0);
+        const keluar = state.penjualan
+          .flatMap(p => p.items)
+          .filter(i => i.id_jenis === j.id)
+          .reduce((acc, i) => acc + i.berat_catatan, 0);
+        return {
+          id_jenis: j.id,
+          nama: j.nama,
+          aktif: j.aktif,
+          stok_kg: +(masuk - keluar).toFixed(2)
+        };
+      });
+    }
+
+    // Validasi Terpusat Aturan Penarikan (S1-P13, S2-P5, UC-09):
+    // 1. Jumlah tidak melebihi saldo efektif tersedia
+    // 2. Tidak ada pengajuan lain yang masih "Menunggu Konfirmasi"
+    // 3. Reguler: minimal Rp 50.000 & maksimal 1x dalam bulan kalender yang sama
+    // 4. Khusus bulan Desember (bulan === '12'): bebas tarik seluruh saldo tanpa batas minimal dan frekuensi
+    function validasiAturanPenarikan(idNasabah, tglStr, jumlah, excludeReqId = null) {
+      const saldoFisik = hitungSaldoNasabah(idNasabah);
+      const tertahan = state.pengajuan_tarik
+        .filter(r => r.id_nasabah === idNasabah && r.status === 'Menunggu Konfirmasi' && r.id !== excludeReqId)
+        .reduce((acc, r) => acc + r.jumlah, 0);
+      const saldoTersedia = saldoFisik - tertahan;
+
+      if (!jumlah || jumlah <= 0) {
+        return { valid: false, pesan: 'Jumlah penarikan harus lebih dari Rp 0.' };
+      }
+      if (jumlah > saldoTersedia) {
+        return {
+          valid: false,
+          pesan: `Jumlah penarikan (${formatRp(jumlah)}) melebihi saldo efektif tersedia (${formatRp(saldoTersedia)}).`
+        };
+      }
+
+      // Cek apakah masih ada pengajuan pending lain
+      const adaPending = state.pengajuan_tarik.find(
+        r => r.id_nasabah === idNasabah && r.status === 'Menunggu Konfirmasi' && r.id !== excludeReqId
+      );
+      if (adaPending) {
+        return {
+          valid: false,
+          pesan: `Nasabah masih memiliki pengajuan pencairan (${adaPending.id} sebesar ${formatRp(adaPending.jumlah)}) yang menunggu konfirmasi Bendahara.`
+        };
+      }
+
+      const bulan = tglStr.slice(0, 7); // YYYY-MM
+      const isDesember = tglStr.slice(5, 7) === '12';
+
+      if (!isDesember) {
+        if (jumlah < 50000) {
+          return {
+            valid: false,
+            pesan: 'Penarikan reguler minimal Rp 50.000 (kecuali bulan Desember boleh menarik seluruh saldo).'
+          };
+        }
+        const sudahTarikBulanIni = state.penarikan.find(
+          t => t.id_nasabah === idNasabah && t.bulan === bulan && !t.dikoreksi
+        );
+        if (sudahTarikBulanIni) {
+          return {
+            valid: false,
+            pesan: `Penarikan hanya diperbolehkan 1 kali dalam sebulan. Nasabah sudah menarik pada bulan ${bulan} (${sudahTarikBulanIni.id}).`
+          };
+        }
+      }
+
+      return { valid: true, pesan: 'Valid' };
+    }
+
+    // ==================== 3. AUTHENTICATION (REGISTER & LOGIN) ====================
+    function switchAuthTab(tab) {
+      const formLogin = document.getElementById('formLogin');
+      const formRegister = document.getElementById('formRegister');
+      const btnLogin = document.getElementById('btnTabLogin');
+      const btnRegister = document.getElementById('btnTabRegister');
+      document.getElementById('authAlert').classList.add('hidden');
+
+      if (tab === 'login') {
+        formLogin.classList.remove('hidden');
+        formRegister.classList.add('hidden');
+        btnLogin.className = 'py-3 text-center bg-white text-emerald-700 border-b-2 border-emerald-600';
+        btnRegister.className = 'py-3 text-center text-slate-500 hover:text-slate-700';
+      } else {
+        formLogin.classList.add('hidden');
+        formRegister.classList.remove('hidden');
+        btnRegister.className = 'py-3 text-center bg-white text-emerald-700 border-b-2 border-emerald-600';
+        btnLogin.className = 'py-3 text-center text-slate-500 hover:text-slate-700';
+      }
+    }
+
+    function showAuthAlert(type, message) {
+      const box = document.getElementById('authAlert');
+      box.className = type === 'error'
+        ? 'text-sm px-3.5 py-2.5 rounded-lg mb-4 bg-red-50 border border-red-300 text-red-700'
+        : 'text-sm px-3.5 py-2.5 rounded-lg mb-4 bg-emerald-50 border border-emerald-300 text-emerald-800';
+      box.innerHTML = message;
+      box.classList.remove('hidden');
+    }
+
+    function fillLogin(identifier, password) {
+      switchAuthTab('login');
+      document.getElementById('loginIdentifier').value = identifier;
+      document.getElementById('loginPassword').value = password;
+    }
+
+    function handleRegister(e) {
+      e.preventDefault();
+      const nama = document.getElementById('regNama').value.trim();
+      const no_hp = document.getElementById('regHp').value.trim();
+      const alamat = document.getElementById('regAlamat').value.trim();
+      const password = document.getElementById('regPassword').value.trim();
+
+      if (state.nasabah.some(n => n.no_hp === no_hp)) {
+        showAuthAlert('error', 'Nomor HP sudah terdaftar pada sistem. Silakan langsung masuk.');
+        return;
+      }
+
+      const nomor_buku = generateNomorBuku();
+      state.nasabah.push({
+        id: state.nasabah.length + 1,
+        nomor_buku,
+        nama,
+        no_hp,
+        alamat,
+        password,
+        saldo_awal: 0,
+        aktif: true
+      });
+      saveState();
+
+      document.getElementById('formRegister').reset();
+      switchAuthTab('login');
+      document.getElementById('loginIdentifier').value = nomor_buku;
+      showAuthAlert('success', `Pendaftaran berhasil! Nomor Buku Tabungan Anda adalah <strong>${nomor_buku}</strong>. Silakan masuk menggunakan Nomor Buku atau No. HP Anda.`);
+    }
+
+    function handleLogin(e) {
+      e.preventDefault();
+      const iden = document.getElementById('loginIdentifier').value.trim();
+      const pass = document.getElementById('loginPassword').value.trim();
+
+      const pengurus = state.users.find(u => u.username.toLowerCase() === iden.toLowerCase() && u.password === pass);
+      if (pengurus) {
+        if (!pengurus.aktif) {
+          showAuthAlert('error', 'Akun pengurus ini telah dinonaktifkan oleh Ketua.');
+          return;
+        }
+        currentUser = { type: 'pengurus', ...pengurus };
+        sessionStorage.setItem('bsl_current_user_v3', JSON.stringify(currentUser));
+        renderApp();
+        return;
+      }
+
+      const nasabah = state.nasabah.find(n =>
+        (n.nomor_buku.toLowerCase() === iden.toLowerCase() || n.no_hp === iden) && n.password === pass
+      );
+      if (nasabah) {
+        if (!nasabah.aktif) {
+          showAuthAlert('error', 'Status keanggotaan nasabah Anda nonaktif. Hubungi pengurus Bank Sampah.');
+          return;
+        }
+        currentUser = { type: 'nasabah', role: 'Nasabah', ...nasabah };
+        sessionStorage.setItem('bsl_current_user_v3', JSON.stringify(currentUser));
+        renderApp();
+        return;
+      }
+
+      showAuthAlert('error', 'Username / Nomor Buku / No. HP atau Kata Sandi salah.');
+    }
+
+    function logout() {
+      currentUser = null;
+      sessionStorage.removeItem('bsl_current_user_v3');
+      renderApp();
+    }
+
+    // ==================== 4. ROLE ROUTING & NAVIGATION ====================
+    function renderApp() {
+      const authView = document.getElementById('authView');
+      const appView = document.getElementById('appView');
+      const navUserArea = document.getElementById('navUserArea');
+      const navUserInfo = document.getElementById('navUserInfo');
+
+      if (!currentUser) {
+        authView.classList.remove('hidden');
+        appView.classList.add('hidden');
+        navUserArea.classList.add('hidden');
+        return;
+      }
+
+      authView.classList.add('hidden');
+      appView.classList.remove('hidden');
+      navUserArea.classList.remove('hidden');
+      navUserInfo.textContent = currentUser.role === 'Nasabah'
+        ? `${currentUser.nama} (${currentUser.nomor_buku})`
+        : `${currentUser.nama} · ${currentUser.role}`;
+
+      const pendingCount = state.pengajuan_tarik.filter(r => r.status === 'Menunggu Konfirmasi').length;
+
+      const menusByRole = {
+        'Nasabah': [
+          { id: 'saldo_nasabah', label: 'Buku Tabungan & Saldo' },
+          { id: 'cairkan_saldo_nasabah', label: 'Ajukan Pencairan Saldo' },
+          { id: 'info_harga_nasabah', label: 'Daftar Harga Sampah Bulan Ini' }
+        ],
+        'Petugas Timbang': [
+          { id: 'catat_setoran', label: 'Catat Setoran Sampah' },
+          { id: 'kelola_nasabah', label: 'Data & Pendaftaran Nasabah' }
+        ],
+        'Bendahara': [
+          {
+            id: 'konfirmasi_pencairan',
+            label: `Konfirmasi Pengajuan Nasabah ${pendingCount > 0 ? `(${pendingCount})` : ''}`
+          },
+          { id: 'catat_penarikan', label: 'Catat Penarikan Langsung' },
+          { id: 'cek_saldo_bendahara', label: 'Cek Saldo Nasabah & Kas' }
+        ],
+        'Ketua': [
+          { id: 'dashboard_ketua', label: 'Stok Gudang & Kas' },
+          { id: 'harga_jenis', label: 'Harga Bulanan & Jenis Sampah' },
+          { id: 'penjualan_susut', label: 'Penjualan Pengepul & Susut' },
+          { id: 'koreksi_transaksi', label: 'Koreksi Transaksi' },
+          { id: 'laporan_bulanan', label: 'Laporan Bulanan' },
+          { id: 'kelola_akun', label: 'Kelola Akun Pengurus' }
+        ]
+      };
+
+      const tabs = menusByRole[currentUser.role] || [];
+      if (!tabs.some(t => t.id === activeTab)) {
+        activeTab = tabs[0]?.id || '';
+      }
+
+      document.getElementById('roleTabs').innerHTML = tabs.map(t => `
+        <button onclick="switchTab('${t.id}')"
+          class="px-4 py-2 rounded-lg text-sm font-semibold transition ${
+            activeTab === t.id
+              ? 'bg-emerald-600 text-white shadow-sm'
+              : 'bg-white text-slate-600 hover:bg-emerald-50 border border-slate-200'
+          }">
+          ${t.label}
+        </button>
+      `).join('');
+
+      renderTabContent();
+    }
+
+    function switchTab(tabId) {
+      activeTab = tabId;
+      renderApp();
+    }
+
+    function renderTabContent() {
+      const container = document.getElementById('tabContent');
+      switch (activeTab) {
+        case 'saldo_nasabah': container.innerHTML = viewSaldoNasabah(currentUser.id); break;
+        case 'cairkan_saldo_nasabah': container.innerHTML = viewCairkanSaldoNasabah(currentUser.id); break;
+        case 'info_harga_nasabah': container.innerHTML = viewInfoHargaNasabah(); break;
+        case 'catat_setoran': container.innerHTML = viewCatatSetoran(); initSetoranRows(); break;
+        case 'kelola_nasabah': container.innerHTML = viewKelolaNasabah(); break;
+        case 'konfirmasi_pencairan': container.innerHTML = viewKonfirmasiPencairan(); break;
+        case 'catat_penarikan': container.innerHTML = viewCatatPenarikan(); break;
+        case 'cek_saldo_bendahara': container.innerHTML = viewCekSaldoBendahara(); break;
+        case 'dashboard_ketua': container.innerHTML = viewDashboardKetua(); break;
+        case 'harga_jenis': container.innerHTML = viewHargaJenis(); break;
+        case 'penjualan_susut': container.innerHTML = viewPenjualanSusut(); break;
+        case 'koreksi_transaksi': container.innerHTML = viewKoreksiTransaksi(); break;
+        case 'laporan_bulanan': container.innerHTML = viewLaporanBulanan(); break;
+        case 'kelola_akun': container.innerHTML = viewKelolaAkun(); break;
+      }
+    }
+
+    // ==================== 5. VIEWS PER USE CASE ====================
+
+    // A1. NASABAH: Buku Tabungan & Saldo
+    function viewSaldoNasabah(idNasabah) {
+      const n = state.nasabah.find(x => x.id === idNasabah);
+      const saldo = hitungSaldoNasabah(idNasabah);
+      const tertahan = hitungSaldoTertahan(idNasabah);
+      const saldoEfektif = saldo - tertahan;
+
+      const riwayatSetor = state.setoran.filter(s => s.id_nasabah === idNasabah).map(s => ({
+        tanggal: s.tanggal,
+        kode: s.id,
+        jenis: 'Setoran Sampah',
+        detail: s.items.map(i => `${i.nama_jenis} (${i.berat} kg × ${formatRp(i.harga)})`).join(', '),
+        nominal: `+ ${formatRp(s.netto_90)}`,
+        ket: `Bruto ${formatRp(s.bruto)} · Potongan Kas 10% (${formatRp(s.kas_10)})`,
+        dikoreksi: s.dikoreksi,
+        alasan: s.alasan_koreksi
+      }));
+      const riwayatTarik = state.penarikan.filter(t => t.id_nasabah === idNasabah).map(t => ({
+        tanggal: t.tanggal,
+        kode: t.id,
+        jenis: 'Penarikan Tunai',
+        detail: `Dikonfirmasi & dicatat oleh Bendahara (${t.bendahara})`,
+        nominal: `- ${formatRp(t.jumlah)}`,
+        ket: t.sumber === 'Pengajuan Nasabah' ? 'Dari pengajuan pencairan online nasabah' : 'Pencairan langsung di balai kelurahan',
+        dikoreksi: t.dikoreksi,
+        alasan: t.alasan_koreksi
+      }));
+      const semua = [...riwayatSetor, ...riwayatTarik].sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
+
+      return `
+        <div class="bg-gradient-to-r from-emerald-700 to-emerald-600 text-white p-6 rounded-2xl shadow mb-6">
+          <div class="flex flex-wrap justify-between items-start gap-4">
+            <div>
+              <span class="text-xs bg-emerald-800 px-2.5 py-1 rounded-full font-mono">No. Buku: ${n.nomor_buku}</span>
+              <h3 class="text-xl font-bold mt-2">${n.nama}</h3>
+              <p class="text-xs text-emerald-100">${n.no_hp} · ${n.alamat || 'Kelurahan Airmadidi'}</p>
+            </div>
+            <div class="text-left sm:text-right">
+              <p class="text-xs text-emerald-200">Saldo Tabungan Bersih (90%)</p>
+              <p class="text-3xl font-extrabold mt-0.5">${formatRp(saldo)}</p>
+              ${tertahan > 0 ? `<p class="text-xs text-amber-200 mt-1">Menunggu Konfirmasi Bendahara: <strong>${formatRp(tertahan)}</strong> (Tersedia: ${formatRp(saldoEfektif)})</p>` : ''}
+            </div>
+          </div>
+          <div class="mt-4 pt-3 border-t border-emerald-500/40 flex flex-wrap justify-between items-center gap-2">
+            <p class="text-xs text-emerald-100">Aturan penarikan: Minimal Rp 50.000 & maksimal 1x sebulan (kecuali Desember bebas tarik semua).</p>
+            <button onclick="switchTab('cairkan_saldo_nasabah')" class="bg-white text-emerald-800 hover:bg-emerald-50 text-xs font-bold px-3.5 py-2 rounded-lg shadow-sm">
+              Ajukan Pencairan Saldo →
+            </button>
+          </div>
+        </div>
+
+        <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+          <h4 class="font-bold text-slate-800 mb-3">Buku Tabungan Digital (Riwayat Transaksi Sah)</h4>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left border-collapse">
+              <thead>
+                <tr class="bg-slate-100 text-slate-600 border-b">
+                  <th class="p-2.5">Tanggal</th>
+                  <th class="p-2.5">Kode</th>
+                  <th class="p-2.5">Transaksi</th>
+                  <th class="p-2.5">Rincian</th>
+                  <th class="p-2.5">Nominal Bersih</th>
+                  <th class="p-2.5">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${semua.length === 0 ? '<tr><td colspan="6" class="p-4 text-center text-slate-400">Belum ada riwayat transaksi.</td></tr>' :
+                  semua.map(r => `
+                    <tr class="border-b ${r.dikoreksi ? 'bg-red-50 text-slate-400 line-through' : ''}">
+                      <td class="p-2.5">${new Date(r.tanggal).toLocaleDateString('id-ID')}</td>
+                      <td class="p-2.5 font-mono text-xs">${r.kode}</td>
+                      <td class="p-2.5 font-semibold">${r.jenis}</td>
+                      <td class="p-2.5 text-xs"><div>${r.detail}</div><div class="text-slate-400">${r.ket}</div></td>
+                      <td class="p-2.5 font-bold ${r.jenis === 'Setoran Sampah' ? 'text-emerald-700' : 'text-purple-700'}">${r.nominal}</td>
+                      <td class="p-2.5 text-xs">${r.dikoreksi ? `Dikoreksi (${r.alasan})` : '<span class="text-emerald-600 font-semibold">Sah</span>'}</td>
+                    </tr>
+                  `).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    // A2. NASABAH: Ajukan Pencairan Saldo (Menunggu Konfirmasi Ibu Bendahara)
+    function viewCairkanSaldoNasabah(idNasabah) {
+      const saldo = hitungSaldoNasabah(idNasabah);
+      const tertahan = hitungSaldoTertahan(idNasabah);
+      const saldoTersedia = saldo - tertahan;
+      const daftarPengajuan = state.pengajuan_tarik.filter(r => r.id_nasabah === idNasabah).slice().reverse();
+
+      return `
+        <div class="grid md:grid-cols-2 gap-6">
+          <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+            <h3 class="font-bold text-lg text-slate-800 mb-1">Ajukan Pencairan Saldo Tabungan</h3>
+            <p class="text-xs text-slate-500 mb-4">Pengajuan Anda akan diperiksa dan dikonfirmasi terlebih dahulu oleh <strong>Bendahara (Ibu Sintia)</strong> sebelum dana tunai dicairkan dan saldo berkurang.</p>
+
+            <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-3.5 mb-4 text-sm">
+              <div class="flex justify-between">
+                <span class="text-slate-600">Saldo Tabungan Tercatat:</span>
+                <strong class="text-emerald-800">${formatRp(saldo)}</strong>
+              </div>
+              <div class="flex justify-between mt-1">
+                <span class="text-slate-600">Saldo Efektif Dapat Diajukan:</span>
+                <strong class="text-emerald-700">${formatRp(saldoTersedia)}</strong>
+              </div>
+            </div>
+
+            <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4 text-xs text-amber-900 space-y-1">
+              <p class="font-bold">Ketentuan Penarikan Bank Sampah Lestari:</p>
+              <ul class="list-disc pl-4 space-y-0.5">
+                <li>Penarikan minimal sebesar <strong>Rp 50.000</strong>.</li>
+                <li>Hanya diperbolehkan <strong>1 kali dalam 1 bulan kalender</strong>.</li>
+                <li>Khusus <strong>bulan Desember</strong> diperbolehkan menarik <strong>seluruh saldo</strong> tanpa batas minimal dan tanpa batas frekuensi.</li>
+              </ul>
+            </div>
+
+            <div id="nasabahTarikAlert" class="hidden p-3 rounded text-sm mb-4"></div>
+
+            <form onsubmit="ajukanPencairanNasabah(event)" class="space-y-4 text-sm">
+              <div>
+                <label class="block text-xs font-semibold mb-1">Rencana Tanggal Pengambilan Uang</label>
+                <input id="reqTglAmbil" type="date" value="2026-11-21" onchange="cekTombolTarikSemuaDesember()" required
+                  class="w-full border rounded-lg px-3 py-2" />
+                <p class="text-[11px] text-slate-400 mt-1">*Pilih tanggal di bulan Desember (mis. 2026-12-19) jika ingin menguji aturan penarikan penuh bulan Desember.</p>
+              </div>
+              <div>
+                <div class="flex justify-between items-center mb-1">
+                  <label class="text-xs font-semibold">Jumlah Pencairan (Rp)</label>
+                  <button type="button" onclick="isiSemuaSaldo()" class="text-xs text-emerald-700 font-semibold hover:underline">
+                    Isi Seluruh Saldo (${formatRp(saldoTersedia)})
+                  </button>
+                </div>
+                <input id="reqJumlah" type="number" min="1" required placeholder="Minimal 50000 (kecuali Desember)"
+                  class="w-full border rounded-lg px-3 py-2" />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold mb-1">Catatan untuk Ibu Bendahara (Opsional)</label>
+                <input id="reqCatatan" type="text" placeholder="Contoh: Diambil Sabtu pagi saat penimbangan"
+                  class="w-full border rounded-lg px-3 py-2" />
+              </div>
+              <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-lg shadow-sm">
+                Kirim Pengajuan ke Bendahara
+              </button>
+            </form>
+          </div>
+
+          <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+            <h4 class="font-bold text-slate-800 mb-3">Status Pengajuan Pencairan Anda</h4>
+            <div class="space-y-3 text-xs">
+              ${daftarPengajuan.length === 0 ? '<p class="text-slate-400 text-center py-6">Belum ada riwayat pengajuan pencairan.</p>' :
+                daftarPengajuan.map(r => {
+                  let badge = 'bg-amber-100 text-amber-800 border-amber-300';
+                  if (r.status === 'Disetujui') badge = 'bg-emerald-100 text-emerald-800 border-emerald-300';
+                  if (r.status === 'Ditolak') badge = 'bg-red-100 text-red-800 border-red-300';
+                  return `
+                    <div class="p-3.5 rounded-lg border bg-slate-50 border-slate-200">
+                      <div class="flex justify-between items-center">
+                        <span class="font-mono font-bold text-slate-700">${r.id}</span>
+                        <span class="px-2 py-0.5 rounded-full border font-semibold ${badge}">${r.status}</span>
+                      </div>
+                      <p class="text-base font-extrabold text-slate-800 mt-1">${formatRp(r.jumlah)}</p>
+                      <p class="text-slate-500 mt-0.5">Rencana Ambil: <strong>${r.tanggal_rencana_ambil}</strong> (Periode ${r.bulan})</p>
+                      ${r.catatan_nasabah ? `<p class="text-slate-500 mt-0.5">Catatan Anda: "${r.catatan_nasabah}"</p>` : ''}
+                      ${r.status === 'Disetujui' ? `<p class="text-emerald-700 font-semibold mt-1.5">✓ Dikonfirmasi oleh ${r.diproses_oleh}. Saldo sudah dipotong & dana siap/telah dicairkan.</p>` : ''}
+                      ${r.status === 'Ditolak' ? `<p class="text-red-600 font-semibold mt-1.5">✕ Ditolak oleh ${r.diproses_oleh}: ${r.alasan_tolak}</p>` : ''}
+                      ${r.status === 'Menunggu Konfirmasi' ? `
+                        <div class="mt-2 pt-2 border-t border-slate-200 flex justify-between items-center">
+                          <span class="text-amber-700">Menunggu verifikasi Ibu Sintia</span>
+                          <button onclick="batalkanPengajuanNasabah('${r.id}')" class="text-red-600 underline font-semibold">Batalkan</button>
+                        </div>
+                      ` : ''}
+                    </div>
+                  `;
+                }).join('')}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function isiSemuaSaldo() {
+      const saldo = hitungSaldoNasabah(currentUser.id) - hitungSaldoTertahan(currentUser.id);
+      const inp = document.getElementById('reqJumlah');
+      if (inp) inp.value = Math.max(0, saldo);
+    }
+
+    function cekTombolTarikSemuaDesember() {
+      // Memberi kenyamanan otomatis jika nasabah memilih bulan Desember
+      const tgl = document.getElementById('reqTglAmbil')?.value || '';
+      if (tgl.slice(5, 7) === '12') {
+        const saldo = hitungSaldoNasabah(currentUser.id) - hitungSaldoTertahan(currentUser.id);
+        const inp = document.getElementById('reqJumlah');
+        if (inp && !inp.value && saldo > 0) {
+          inp.value = saldo;
+        }
+      }
+    }
+
+    function ajukanPencairanNasabah(e) {
+      e.preventDefault();
+      const tglAmbil = document.getElementById('reqTglAmbil').value;
+      const jumlah = parseFloat(document.getElementById('reqJumlah').value);
+      const catatan = document.getElementById('reqCatatan').value.trim();
+      const alertBox = document.getElementById('nasabahTarikAlert');
+
+      const cek = validasiAturanPenarikan(currentUser.id, tglAmbil, jumlah);
+      if (!cek.valid) {
+        alertBox.className = 'p-3 rounded text-sm mb-4 bg-red-50 border border-red-300 text-red-700';
+        alertBox.textContent = 'Pengajuan Ditolak: ' + cek.pesan;
+        return;
+      }
+
+      state.pengajuan_tarik.push({
+        id: 'REQ-' + (5001 + state.pengajuan_tarik.length),
+        id_nasabah: currentUser.id,
+        tanggal_pengajuan: new Date().toISOString(),
+        tanggal_rencana_ambil: tglAmbil,
+        bulan: tglAmbil.slice(0, 7),
+        jumlah,
+        catatan_nasabah: catatan,
+        status: 'Menunggu Konfirmasi',
+        diproses_oleh: '',
+        tanggal_proses: '',
+        alasan_tolak: ''
+      });
+
+      saveState();
+      alert('Pengajuan pencairan saldo berhasil dikirim! Silakan tunggu konfirmasi dari Bendahara (Ibu Sintia).');
+      renderTabContent();
+    }
+
+    function batalkanPengajuanNasabah(reqId) {
+      if (!confirm('Batalkan pengajuan pencairan ini?')) return;
+      state.pengajuan_tarik = state.pengajuan_tarik.filter(r => r.id !== reqId);
+      saveState();
+      renderTabContent();
+    }
+
+    // A3. NASABAH: Info Harga Sampah
+    function viewInfoHargaNasabah() {
+      const bulan = getCurrentMonth();
+      const hargaMap = state.harga_bulanan[bulan] || {};
+      return `
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 max-w-2xl">
+          <h3 class="font-bold text-lg text-slate-800 mb-1">Daftar Harga Beli Sampah Periode ${bulan}</h3>
+          <p class="text-xs text-slate-500 mb-4">Ditetapkan oleh Ketua Bank Sampah Lestari (Ibu Meiske Rondonuwu). Pastikan sampah sudah dipilah sebelum dibawa ke balai kelurahan setiap Sabtu pagi.</p>
+          <table class="w-full text-sm text-left border-collapse">
+            <thead>
+              <tr class="bg-slate-100 border-b">
+                <th class="p-2.5">Jenis Sampah Terpilah</th>
+                <th class="p-2.5 text-right">Harga Kotor / Kg</th>
+                <th class="p-2.5 text-right">Bersih Masuk Tabungan (90%)</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${state.jenis_sampah.filter(j => j.aktif).map(j => {
+                const h = hargaMap[j.id] || 0;
+                return `
+                  <tr class="border-b">
+                    <td class="p-2.5 font-medium">${j.nama}</td>
+                    <td class="p-2.5 text-right">${formatRp(h)} / kg</td>
+                    <td class="p-2.5 text-right font-semibold text-emerald-700">${formatRp(h * 0.9)} / kg</td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    // B1. PETUGAS TIMBANG: Catat Setoran
+    function viewCatatSetoran() {
+      const nasabahAktif = state.nasabah.filter(n => n.aktif);
+      return `
+        <div class="grid md:grid-cols-3 gap-6">
+          <div class="md:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+            <h3 class="font-bold text-lg text-slate-800 mb-1">Form Pencatatan Setoran Sampah (Sabtu Pagi)</h3>
+            <p class="text-xs text-slate-500 mb-4">Sistem otomatis menghitung nilai kotor, potongan 10% kas operasional, dan 90% saldo tabungan nasabah.</p>
+            <form onsubmit="simpanSetoran(event)" class="space-y-4">
+              <div class="grid sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-600 mb-1">Pilih Nasabah</label>
+                  <select id="setorNasabah" required class="w-full border rounded-lg px-3 py-2 text-sm">
+                    ${nasabahAktif.map(n => `<option value="${n.id}">${n.nomor_buku} - ${n.nama} (Saldo: ${formatRp(hitungSaldoNasabah(n.id))})</option>`).join('')}
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-600 mb-1">Bulan Acuan Harga</label>
+                  <input id="setorBulan" type="month" value="${getCurrentMonth()}" onchange="hitungPreviewSetoran()" required
+                    class="w-full border rounded-lg px-3 py-2 text-sm" />
+                </div>
+              </div>
+
+              <div>
+                <div class="flex justify-between items-center mb-2">
+                  <label class="text-xs font-semibold text-slate-600">Daftar Jenis Sampah yang Ditimbang</label>
+                  <button type="button" onclick="tambahBarisSetoran()" class="text-xs bg-blue-600 text-white px-2.5 py-1 rounded hover:bg-blue-700">+ Tambah Jenis</button>
+                </div>
+                <div id="setoranRows" class="space-y-2"></div>
+              </div>
+
+              <div class="bg-emerald-50 border border-emerald-200 p-4 rounded-lg text-sm space-y-1">
+                <div class="flex justify-between"><span>Total Nilai Kotor (Bruto):</span><strong id="prevBruto">Rp 0</strong></div>
+                <div class="flex justify-between text-amber-700"><span>Potongan Kas Operasional (10%):</span><strong id="prevKas">Rp 0</strong></div>
+                <div class="flex justify-between text-emerald-800 text-base border-t border-emerald-200 pt-1">
+                  <span>Masuk Tabungan Nasabah (90% Netto):</span><strong id="prevNetto">Rp 0</strong>
+                </div>
+              </div>
+
+              <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-lg">
+                Simpan Setoran & Update Saldo
+              </button>
+            </form>
+          </div>
+
+          <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+            <h4 class="font-bold text-slate-800 mb-3">Setoran Terbaru</h4>
+            <div class="space-y-3 text-xs">
+              ${state.setoran.slice().reverse().slice(0, 6).map(s => {
+                const n = state.nasabah.find(x => x.id === s.id_nasabah);
+                return `
+                  <div class="p-3 rounded border ${s.dikoreksi ? 'bg-red-50 border-red-200' : 'bg-slate-50 border-slate-200'}">
+                    <div class="flex justify-between font-bold">
+                      <span>${s.id} · ${n ? n.nama : '-'}</span>
+                      <span class="text-emerald-700">${formatRp(s.netto_90)}</span>
+                    </div>
+                    <p class="text-slate-500 mt-1">${s.items.map(i => `${i.nama_jenis} ${i.berat}kg`).join(', ')}</p>
+                    <p class="text-slate-400 mt-0.5">Petugas: ${s.petugas} ${s.dikoreksi ? '· [DIKOREKSI]' : ''}</p>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function initSetoranRows() {
+      const container = document.getElementById('setoranRows');
+      if (!container) return;
+      container.innerHTML = '';
+      tambahBarisSetoran();
+    }
+
+    function tambahBarisSetoran() {
+      const container = document.getElementById('setoranRows');
+      const jenisAktif = state.jenis_sampah.filter(j => j.aktif);
+      const row = document.createElement('div');
+      row.className = 'grid grid-cols-12 gap-2 items-center setoran-row';
+      row.innerHTML = `
+        <select class="col-span-6 border rounded px-2 py-1.5 text-sm jenis-select" onchange="hitungPreviewSetoran()">
+          ${jenisAktif.map(j => `<option value="${j.id}">${j.nama}</option>`).join('')}
+        </select>
+        <input type="number" step="0.1" min="0.1" placeholder="Berat (kg)" required
+          class="col-span-4 border rounded px-2 py-1.5 text-sm berat-input" oninput="hitungPreviewSetoran()" />
+        <button type="button" onclick="this.parentElement.remove(); hitungPreviewSetoran();"
+          class="col-span-2 bg-red-100 text-red-700 rounded py-1.5 text-xs font-bold hover:bg-red-200">Hapus</button>
+      `;
+      container.appendChild(row);
+    }
+
+    function hitungPreviewSetoran() {
+      const bulan = document.getElementById('setorBulan')?.value || getCurrentMonth();
+      const hargaMap = state.harga_bulanan[bulan] || {};
+      let bruto = 0;
+
+      document.querySelectorAll('.setoran-row').forEach(row => {
+        const idJenis = parseInt(row.querySelector('.jenis-select').value);
+        const berat = parseFloat(row.querySelector('.berat-input').value) || 0;
+        const harga = hargaMap[idJenis] || 0;
+        bruto += berat * harga;
+      });
+
+      const kas = bruto * 0.10;
+      const netto = bruto - kas;
+      document.getElementById('prevBruto').textContent = formatRp(bruto);
+      document.getElementById('prevKas').textContent = formatRp(kas);
+      document.getElementById('prevNetto').textContent = formatRp(netto);
+    }
+
+    function simpanSetoran(e) {
+      e.preventDefault();
+      const idNasabah = parseInt(document.getElementById('setorNasabah').value);
+      const bulan = document.getElementById('setorBulan').value;
+      const hargaMap = state.harga_bulanan[bulan];
+
+      if (!hargaMap) {
+        alert(`Harga bulanan untuk periode ${bulan} belum ditetapkan oleh Ketua!`);
+        return;
+      }
+
+      const items = [];
+      let bruto = 0;
+      let valid = true;
+
+      document.querySelectorAll('.setoran-row').forEach(row => {
+        const idJenis = parseInt(row.querySelector('.jenis-select').value);
+        const berat = parseFloat(row.querySelector('.berat-input').value);
+        if (!berat || berat <= 0) {
+          valid = false;
+          return;
+        }
+        const harga = hargaMap[idJenis];
+        if (!harga) {
+          alert('Salah satu jenis sampah belum memiliki harga pada bulan terpilih.');
+          valid = false;
+          return;
+        }
+        const jenisObj = state.jenis_sampah.find(j => j.id === idJenis);
+        const subtotal = berat * harga;
+        bruto += subtotal;
+        items.push({ id_jenis: idJenis, nama_jenis: jenisObj.nama, berat, harga, subtotal });
+      });
+
+      if (!valid || items.length === 0) return;
+
+      const kas_10 = Math.round(bruto * 0.10);
+      const netto_90 = Math.round(bruto - kas_10);
+
+      state.setoran.push({
+        id: 'STR-' + (1001 + state.setoran.length),
+        id_nasabah: idNasabah,
+        petugas: currentUser.nama,
+        tanggal: new Date().toISOString(),
+        bulan,
+        items,
+        bruto,
+        kas_10,
+        netto_90,
+        dikoreksi: false,
+        alasan_koreksi: ''
+      });
+
+      saveState();
+      alert(`Setoran berhasil disimpan! Saldo nasabah bertambah ${formatRp(netto_90)}.`);
+      renderTabContent();
+    }
+
+    // B2. PETUGAS TIMBANG: Kelola Nasabah
+    function viewKelolaNasabah() {
+      const nextBuku = generateNomorBuku();
+      return `
+        <div class="grid md:grid-cols-3 gap-6">
+          <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+            <h3 class="font-bold text-slate-800 mb-3">Daftarkan Nasabah Baru</h3>
+            <form onsubmit="tambahNasabah(event)" class="space-y-3 text-sm">
+              <div>
+                <label class="block text-xs font-semibold mb-1">Nomor Buku Tabungan</label>
+                <input id="nBuku" type="text" required value="${nextBuku}" class="w-full border rounded px-3 py-2 font-mono" />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold mb-1">Nama Lengkap (KK)</label>
+                <input id="nNama" type="text" required placeholder="Nama warga" class="w-full border rounded px-3 py-2" />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold mb-1">Nomor HP</label>
+                <input id="nHp" type="text" required placeholder="0812..." class="w-full border rounded px-3 py-2" />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold mb-1">Alamat / Lingkungan</label>
+                <input id="nAlamat" type="text" required placeholder="Kel. Airmadidi" class="w-full border rounded px-3 py-2" />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold mb-1">Saldo Awal Migrasi Buku Lama (Rp)</label>
+                <input id="nSaldo" type="number" min="0" value="0" required class="w-full border rounded px-3 py-2" />
+              </div>
+              <button type="submit" class="w-full bg-emerald-600 text-white font-semibold py-2 rounded-lg hover:bg-emerald-700">
+                Simpan Nasabah
+              </button>
+            </form>
+          </div>
+
+          <div class="md:col-span-2 bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+            <h3 class="font-bold text-slate-800 mb-3">Daftar Nasabah Terdaftar (${state.nasabah.length} KK)</h3>
+            <div class="overflow-x-auto">
+              <table class="w-full text-sm text-left border-collapse">
+                <thead>
+                  <tr class="bg-slate-100 border-b">
+                    <th class="p-2.5">No. Buku</th>
+                    <th class="p-2.5">Nama</th>
+                    <th class="p-2.5">No. HP</th>
+                    <th class="p-2.5">Saldo Terkini</th>
+                    <th class="p-2.5">Status</th>
+                    <th class="p-2.5">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${state.nasabah.map(n => `
+                    <tr class="border-b">
+                      <td class="p-2.5 font-mono font-bold">${n.nomor_buku}</td>
+                      <td class="p-2.5">${n.nama}</td>
+                      <td class="p-2.5">${n.no_hp}</td>
+                      <td class="p-2.5 font-semibold text-emerald-700">${formatRp(hitungSaldoNasabah(n.id))}</td>
+                      <td class="p-2.5">${n.aktif ? '<span class="text-xs bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded">Aktif</span>' : '<span class="text-xs bg-red-100 text-red-800 px-2 py-0.5 rounded">Nonaktif</span>'}</td>
+                      <td class="p-2.5">
+                        <button onclick="toggleNasabah(${n.id})" class="text-xs underline text-blue-600">
+                          ${n.aktif ? 'Nonaktifkan' : 'Aktifkan'}
+                        </button>
+                      </td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function tambahNasabah(e) {
+      e.preventDefault();
+      const nomor_buku = document.getElementById('nBuku').value.trim();
+      const nama = document.getElementById('nNama').value.trim();
+      const no_hp = document.getElementById('nHp').value.trim();
+      const alamat = document.getElementById('nAlamat').value.trim();
+      const saldo_awal = parseFloat(document.getElementById('nSaldo').value) || 0;
+
+      if (state.nasabah.some(x => x.nomor_buku.toLowerCase() === nomor_buku.toLowerCase() || x.no_hp === no_hp)) {
+        alert('Nomor buku tabungan atau nomor HP sudah terdaftar!');
+        return;
+      }
+
+      state.nasabah.push({
+        id: state.nasabah.length + 1,
+        nomor_buku,
+        nama,
+        no_hp,
+        alamat,
+        password: '123456',
+        saldo_awal,
+        aktif: true
+      });
+      saveState();
+      alert('Nasabah berhasil ditambahkan! Password default login nasabah: 123456');
+      renderTabContent();
+    }
+
+    function toggleNasabah(id) {
+      const n = state.nasabah.find(x => x.id === id);
+      if (n) {
+        n.aktif = !n.aktif;
+        saveState();
+        renderTabContent();
+      }
+    }
+
+    // C1. BENDAHARA: Konfirmasi Pengajuan Pencairan Nasabah (Fitur Baru!)
+    function viewKonfirmasiPencairan() {
+      const pendingList = state.pengajuan_tarik.filter(r => r.status === 'Menunggu Konfirmasi').slice().reverse();
+      const riwayatList = state.pengajuan_tarik.filter(r => r.status !== 'Menunggu Konfirmasi').slice().reverse();
+
+      return `
+        <div class="space-y-6">
+          <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+            <h3 class="font-bold text-lg text-slate-800 mb-1">Konfirmasi Pengajuan Pencairan Saldo Nasabah</h3>
+            <p class="text-xs text-slate-500 mb-4">Verifikasi pengajuan penarikan dari nasabah. Saat disetujui, sistem otomatis memvalidasi aturan (saldo cukup, min. Rp 50.000, maks. 1x/bulan kecuali Desember), mengurangi saldo nasabah, dan mencatatnya ke buku kas penarikan.</p>
+
+            ${pendingList.length === 0 ? '<div class="p-6 text-center text-sm text-slate-400 bg-slate-50 rounded-lg border border-dashed">Tidak ada pengajuan pencairan nasabah yang menunggu konfirmasi saat ini.</div>' : `
+              <div class="grid md:grid-cols-2 gap-4">
+                ${pendingList.map(r => {
+                  const n = state.nasabah.find(x => x.id === r.id_nasabah);
+                  const saldoSaatIni = n ? hitungSaldoNasabah(n.id) : 0;
+                  return `
+                    <div class="p-4 rounded-xl border-2 border-amber-300 bg-amber-50/40 space-y-2">
+                      <div class="flex justify-between items-center">
+                        <span class="font-mono text-xs font-bold bg-amber-200 text-amber-900 px-2 py-0.5 rounded">${r.id}</span>
+                        <span class="text-xs text-slate-500">Diajukan: ${new Date(r.tanggal_pengajuan).toLocaleDateString('id-ID')}</span>
+                      </div>
+                      <div>
+                        <p class="font-bold text-base text-slate-800">${n ? `${n.nama} (${n.nomor_buku})` : '-'}</p>
+                        <p class="text-xs text-slate-500">No. HP: ${n ? n.no_hp : '-'} · Saldo Nasabah: <strong class="text-emerald-700">${formatRp(saldoSaatIni)}</strong></p>
+                      </div>
+                      <div class="bg-white p-3 rounded-lg border border-amber-200 text-sm">
+                        <div class="flex justify-between">
+                          <span class="text-slate-600">Nominal Diajukan:</span>
+                          <strong class="text-purple-700 text-base">${formatRp(r.jumlah)}</strong>
+                        </div>
+                        <div class="flex justify-between text-xs mt-1">
+                          <span class="text-slate-500">Rencana Pengambilan:</span>
+                          <strong>${r.tanggal_rencana_ambil} (${r.bulan})</strong>
+                        </div>
+                        ${r.catatan_nasabah ? `<p class="text-xs text-slate-500 mt-1.5 italic">"${r.catatan_nasabah}"</p>` : ''}
+                      </div>
+                      <div class="grid grid-cols-2 gap-2 pt-2">
+                        <button onclick="setujuiPengajuan('${r.id}')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-lg text-xs">
+                          ✓ Konfirmasi & Cairkan
+                        </button>
+                        <button onclick="tolakPengajuan('${r.id}')" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 rounded-lg text-xs">
+                          ✕ Tolak Pengajuan
+                        </button>
+                      </div>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            `}
+          </div>
+
+          <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+            <h4 class="font-bold text-slate-800 mb-3">Riwayat Konfirmasi Pengajuan Nasabah</h4>
+            <div class="overflow-x-auto">
+              <table class="w-full text-xs text-left border-collapse">
+                <thead>
+                  <tr class="bg-slate-100 border-b">
+                    <th class="p-2.5">Kode</th>
+                    <th class="p-2.5">Nasabah</th>
+                    <th class="p-2.5">Nominal</th>
+                    <th class="p-2.5">Tgl Rencana Ambil</th>
+                    <th class="p-2.5">Status</th>
+                    <th class="p-2.5">Keterangan Bendahara</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${riwayatList.length === 0 ? '<tr><td colspan="6" class="p-4 text-center text-slate-400">Belum ada riwayat konfirmasi.</td></tr>' :
+                    riwayatList.map(r => {
+                      const n = state.nasabah.find(x => x.id === r.id_nasabah);
+                      return `
+                        <tr class="border-b">
+                          <td class="p-2.5 font-mono">${r.id}</td>
+                          <td class="p-2.5 font-medium">${n ? `${n.nama} (${n.nomor_buku})` : '-'}</td>
+                          <td class="p-2.5 font-bold">${formatRp(r.jumlah)}</td>
+                          <td class="p-2.5">${r.tanggal_rencana_ambil}</td>
+                          <td class="p-2.5">${r.status === 'Disetujui' ? '<span class="text-emerald-700 font-bold">Disetujui</span>' : '<span class="text-red-600 font-bold">Ditolak</span>'}</td>
+                          <td class="p-2.5">${r.status === 'Disetujui' ? `Dikonfirmasi oleh ${r.diproses_oleh}` : `Ditolak (${r.alasan_tolak})`}</td>
+                        </tr>
+                      `;
+                    }).join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function setujuiPengajuan(reqId) {
+      const req = state.pengajuan_tarik.find(r => r.id === reqId);
+      if (!req || req.status !== 'Menunggu Konfirmasi') return;
+
+      // Validasi ulang aturan bisnis saat Bendahara menekan Konfirmasi
+      const cek = validasiAturanPenarikan(req.id_nasabah, req.tanggal_rencana_ambil, req.jumlah, req.id);
+      if (!cek.valid) {
+        alert('Tidak dapat menyetujui pengajuan karena melanggar aturan:\n' + cek.pesan);
+        return;
+      }
+
+      if (!confirm(`Konfirmasi pencairan saldo sebesar ${formatRp(req.jumlah)} untuk pengajuan ${req.id}?`)) return;
+
+      req.status = 'Disetujui';
+      req.diproses_oleh = currentUser.nama;
+      req.tanggal_proses = new Date().toISOString();
+
+      // Masuk ke tabel transaksi penarikan resmi & otomatis memotong saldo nasabah
+      state.penarikan.push({
+        id: 'TRK-' + (2001 + state.penarikan.length),
+        id_nasabah: req.id_nasabah,
+        bendahara: currentUser.nama,
+        tanggal: new Date(req.tanggal_rencana_ambil).toISOString(),
+        bulan: req.bulan,
+        jumlah: req.jumlah,
+        sumber: 'Pengajuan Nasabah',
+        dikoreksi: false,
+        alasan_koreksi: ''
+      });
+
+      saveState();
+      alert('Pengajuan pencairan berhasil dikonfirmasi! Saldo nasabah telah dipotong.');
+      renderApp();
+    }
+
+    function tolakPengajuan(reqId) {
+      const req = state.pengajuan_tarik.find(r => r.id === reqId);
+      if (!req || req.status !== 'Menunggu Konfirmasi') return;
+
+      const alasan = prompt('Masukkan alasan penolakan pengajuan ini (wajib diisi):');
+      if (!alasan || !alasan.trim()) return;
+
+      req.status = 'Ditolak';
+      req.diproses_oleh = currentUser.nama;
+      req.tanggal_proses = new Date().toISOString();
+      req.alasan_tolak = alasan.trim();
+
+      saveState();
+      alert('Pengajuan pencairan telah ditolak.');
+      renderApp();
+    }
+
+    // C2. BENDAHARA: Catat Penarikan Langsung di Balai Kelurahan
+    function viewCatatPenarikan() {
+      const nasabahAktif = state.nasabah.filter(n => n.aktif);
+      return `
+        <div class="grid md:grid-cols-2 gap-6">
+          <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+            <h3 class="font-bold text-lg text-slate-800 mb-2">Form Pencairan / Penarikan Langsung</h3>
+            <p class="text-xs text-slate-500 mb-4">Untuk nasabah yang datang langsung ke Bendahara tanpa pengajuan online. Aturan: Minimal <strong>Rp 50.000</strong> & maksimal <strong>1x per bulan</strong> (khusus <strong>Desember</strong> bebas ambil semua).</p>
+
+            <div id="tarikAlert" class="hidden p-3 rounded text-sm mb-4"></div>
+
+            <form onsubmit="prosesPenarikan(event)" class="space-y-4">
+              <div>
+                <label class="block text-xs font-semibold mb-1">Pilih Nasabah</label>
+                <select id="tarikNasabah" required class="w-full border rounded-lg px-3 py-2 text-sm">
+                  ${nasabahAktif.map(n => `<option value="${n.id}">${n.nomor_buku} - ${n.nama} (Saldo: ${formatRp(hitungSaldoNasabah(n.id))})</option>`).join('')}
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold mb-1">Tanggal Penarikan</label>
+                <input id="tarikTanggal" type="date" value="2026-11-16" required class="w-full border rounded-lg px-3 py-2 text-sm" />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold mb-1">Jumlah Penarikan (Rp)</label>
+                <input id="tarikJumlah" type="number" min="1" required placeholder="Minimal 50000 (kecuali Desember)" class="w-full border rounded-lg px-3 py-2 text-sm" />
+              </div>
+              <button type="submit" class="w-full bg-purple-700 hover:bg-purple-800 text-white font-bold py-2.5 rounded-lg">
+                Validasi & Cairkan Saldo
+              </button>
+            </form>
+          </div>
+
+          <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+            <h4 class="font-bold text-slate-800 mb-3">Riwayat Penarikan Sah Terbaru</h4>
+            <div class="space-y-3 text-xs">
+              ${state.penarikan.slice().reverse().map(t => {
+                const n = state.nasabah.find(x => x.id === t.id_nasabah);
+                return `
+                  <div class="p-3 rounded border ${t.dikoreksi ? 'bg-red-50 border-red-200' : 'bg-slate-50 border-slate-200'}">
+                    <div class="flex justify-between font-bold">
+                      <span>${t.id} · ${n ? n.nama : '-'}</span>
+                      <span class="text-purple-700">${formatRp(t.jumlah)}</span>
+                    </div>
+                    <p class="text-slate-500 mt-1">Tanggal: ${new Date(t.tanggal).toLocaleDateString('id-ID')} · Bendahara: ${t.bendahara}</p>
+                    ${t.dikoreksi ? `<p class="text-red-600 font-semibold mt-1">Dikoreksi: ${t.alasan_koreksi}</p>` : ''}
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function prosesPenarikan(e) {
+      e.preventDefault();
+      const idNasabah = parseInt(document.getElementById('tarikNasabah').value);
+      const tglStr = document.getElementById('tarikTanggal').value;
+      const jumlah = parseFloat(document.getElementById('tarikJumlah').value);
+      const alertBox = document.getElementById('tarikAlert');
+
+      const cek = validasiAturanPenarikan(idNasabah, tglStr, jumlah);
+      if (!cek.valid) {
+        alertBox.className = 'p-3 rounded text-sm mb-4 bg-red-50 border border-red-300 text-red-700';
+        alertBox.textContent = 'Ditolak: ' + cek.pesan;
+        return;
+      }
+
+      state.penarikan.push({
+        id: 'TRK-' + (2001 + state.penarikan.length),
+        id_nasabah: idNasabah,
+        bendahara: currentUser.nama,
+        tanggal: new Date(tglStr).toISOString(),
+        bulan: tglStr.slice(0, 7),
+        jumlah,
+        sumber: 'Langsung',
+        dikoreksi: false,
+        alasan_koreksi: ''
+      });
+      saveState();
+      alert('Penarikan berhasil dicatat dan saldo nasabah telah dikurangi!');
+      renderTabContent();
+    }
+
+    // C3. BENDAHARA: Cek Saldo Nasabah & Kas
+    function viewCekSaldoBendahara() {
+      return `
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+          <div class="flex flex-wrap justify-between items-center gap-2 mb-4">
+            <h3 class="font-bold text-lg">Daftar Saldo Seluruh Nasabah</h3>
+            <div class="bg-amber-50 border border-amber-200 px-4 py-2 rounded-lg text-sm">
+              Total Kas Operasional (10%): <strong class="text-amber-800">${formatRp(hitungTotalKas())}</strong>
+            </div>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left border-collapse">
+              <thead>
+                <tr class="bg-slate-100 border-b">
+                  <th class="p-2.5">No. Buku</th>
+                  <th class="p-2.5">Nama Nasabah</th>
+                  <th class="p-2.5">No. HP</th>
+                  <th class="p-2.5">Saldo Tersedia</th>
+                  <th class="p-2.5">Pengajuan Pending</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${state.nasabah.map(n => {
+                  const pending = hitungSaldoTertahan(n.id);
+                  return `
+                    <tr class="border-b">
+                      <td class="p-2.5 font-mono">${n.nomor_buku}</td>
+                      <td class="p-2.5 font-medium">${n.nama}</td>
+                      <td class="p-2.5">${n.no_hp}</td>
+                      <td class="p-2.5 font-bold text-emerald-700">${formatRp(hitungSaldoNasabah(n.id))}</td>
+                      <td class="p-2.5 text-xs">${pending > 0 ? `<span class="text-amber-700 font-semibold">${formatRp(pending)}</span>` : '-'}</td>
+                    </tr>
+                  `;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    // D. KETUA VIEWS
+    function viewDashboardKetua() {
+      const stok = hitungStokGudang();
+      const totalStokKg = stok.reduce((a, b) => a + b.stok_kg, 0);
+      const totalKas = hitungTotalKas();
+      const totalSaldoWarga = state.nasabah.reduce((a, n) => a + hitungSaldoNasabah(n.id), 0);
+
+      return `
+        <div class="grid sm:grid-cols-3 gap-4 mb-6">
+          <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+            <p class="text-xs text-slate-500">Total Stok Gudang Saat Ini</p>
+            <h4 class="text-2xl font-extrabold text-emerald-700 mt-1">${totalStokKg.toFixed(2)} kg</h4>
+          </div>
+          <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+            <p class="text-xs text-slate-500">Kas Operasional Terkumpul (10%)</p>
+            <h4 class="text-2xl font-extrabold text-amber-600 mt-1">${formatRp(totalKas)}</h4>
+          </div>
+          <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+            <p class="text-xs text-slate-500">Total Kewajiban Saldo Nasabah</p>
+            <h4 class="text-2xl font-extrabold text-blue-700 mt-1">${formatRp(totalSaldoWarga)}</h4>
+          </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+          <h3 class="font-bold text-slate-800 mb-3">Rincian Stok Sampah di Gudang Belakang Balai</h3>
+          <table class="w-full text-sm text-left border-collapse">
+            <thead>
+              <tr class="bg-slate-100 border-b">
+                <th class="p-2.5">Jenis Sampah</th>
+                <th class="p-2.5">Stok Tercatat (kg)</th>
+                <th class="p-2.5">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${stok.map(s => `
+                <tr class="border-b">
+                  <td class="p-2.5 font-medium">${s.nama}</td>
+                  <td class="p-2.5 font-bold">${s.stok_kg} kg</td>
+                  <td class="p-2.5 text-xs">${s.stok_kg < 0 ? '<span class="text-red-600 font-bold">Anomali (Negatif)</span>' : '<span class="text-emerald-600">Siap Jual / Normal</span>'}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function viewHargaJenis() {
+      const bulan = getCurrentMonth();
+      const hargaMap = state.harga_bulanan[bulan] || {};
+      return `
+        <div class="grid md:grid-cols-2 gap-6">
+          <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+            <h3 class="font-bold text-slate-800 mb-2">Tetapkan Harga Beli Bulanan (Per Kg)</h3>
+            <p class="text-xs text-slate-500 mb-4">Perubahan harga hanya berlaku untuk setoran baru; setoran lama tetap memakai harga saat dicatat.</p>
+            <form onsubmit="simpanHargaBulanan(event)" class="space-y-3 text-sm">
+              <div>
+                <label class="block text-xs font-semibold mb-1">Periode Bulan</label>
+                <input id="hargaBulanInput" type="month" value="${bulan}" onchange="muatFormHarga()" class="border rounded px-3 py-1.5" />
+              </div>
+              <div id="daftarInputHarga" class="space-y-2">
+                ${state.jenis_sampah.filter(j => j.aktif).map(j => `
+                  <div class="flex justify-between items-center border-b pb-2">
+                    <span>${j.nama}</span>
+                    <input type="number" min="1" required data-jenis="${j.id}" value="${hargaMap[j.id] || ''}" placeholder="Rp/kg"
+                      class="harga-field border rounded px-2.5 py-1 w-36 text-right" />
+                  </div>
+                `).join('')}
+              </div>
+              <button type="submit" class="w-full bg-emerald-600 text-white font-bold py-2 rounded-lg hover:bg-emerald-700">
+                Simpan Harga Bulanan
+              </button>
+            </form>
+          </div>
+
+          <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+            <h3 class="font-bold text-slate-800 mb-3">Kelola Jenis Sampah</h3>
+            <form onsubmit="tambahJenisSampah(event)" class="flex gap-2 mb-4">
+              <input id="jenisBaruInput" type="text" required placeholder="Nama jenis sampah baru..." class="flex-grow border rounded px-3 py-2 text-sm" />
+              <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded text-sm font-semibold">Tambah</button>
+            </form>
+            <ul class="divide-y text-sm">
+              ${state.jenis_sampah.map(j => `
+                <li class="py-2 flex justify-between items-center">
+                  <span class="${j.aktif ? '' : 'line-through text-slate-400'}">${j.nama}</span>
+                  <button onclick="toggleJenis(${j.id})" class="text-xs underline ${j.aktif ? 'text-red-600' : 'text-emerald-600'}">
+                    ${j.aktif ? 'Nonaktifkan' : 'Aktifkan'}
+                  </button>
+                </li>
+              `).join('')}
+            </ul>
+          </div>
+        </div>
+      `;
+    }
+
+    function muatFormHarga() {
+      const bulan = document.getElementById('hargaBulanInput').value;
+      const hargaMap = state.harga_bulanan[bulan] || {};
+      document.querySelectorAll('.harga-field').forEach(inp => {
+        const idJ = inp.getAttribute('data-jenis');
+        inp.value = hargaMap[idJ] || '';
+      });
+    }
+
+    function simpanHargaBulanan(e) {
+      e.preventDefault();
+      const bulan = document.getElementById('hargaBulanInput').value;
+      if (!state.harga_bulanan[bulan]) state.harga_bulanan[bulan] = {};
+      document.querySelectorAll('.harga-field').forEach(inp => {
+        const idJ = parseInt(inp.getAttribute('data-jenis'));
+        const val = parseFloat(inp.value);
+        if (val > 0) state.harga_bulanan[bulan][idJ] = val;
+      });
+      saveState();
+      alert(`Harga bulan ${bulan} berhasil disimpan!`);
+    }
+
+    function tambahJenisSampah(e) {
+      e.preventDefault();
+      const nama = document.getElementById('jenisBaruInput').value.trim();
+      if (state.jenis_sampah.some(j => j.nama.toLowerCase() === nama.toLowerCase())) {
+        alert('Jenis sampah sudah ada!');
+        return;
+      }
+      state.jenis_sampah.push({ id: state.jenis_sampah.length + 1, nama, aktif: true });
+      saveState();
+      renderTabContent();
+    }
+
+    function toggleJenis(id) {
+      const j = state.jenis_sampah.find(x => x.id === id);
+      if (j) {
+        j.aktif = !j.aktif;
+        saveState();
+        renderTabContent();
+      }
+    }
+
+    function viewPenjualanSusut() {
+      const stok = hitungStokGudang().filter(s => s.stok_kg > 0);
+      return `
+        <div class="grid md:grid-cols-2 gap-6">
+          <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+            <h3 class="font-bold text-slate-800 mb-2">Catat Penjualan ke Pengepul & Susut</h3>
+            <p class="text-xs text-slate-500 mb-4">Masukkan berat hasil timbang ulang pengepul untuk menghitung penyusutan otomatis.</p>
+            ${stok.length === 0 ? '<p class="text-sm text-slate-400">Tidak ada stok gudang yang tersedia untuk dijual.</p>' : `
+              <form onsubmit="simpanPenjualan(event)" class="space-y-3 text-sm">
+                <div>
+                  <label class="block text-xs font-semibold mb-1">Tanggal Penjualan</label>
+                  <input id="jualTanggal" type="date" value="2026-11-16" required class="border rounded px-3 py-1.5" />
+                </div>
+                <div class="space-y-2">
+                  ${stok.map(s => `
+                    <div class="p-3 bg-slate-50 rounded border jual-row" data-jenis="${s.id_jenis}" data-nama="${s.nama}" data-catatan="${s.stok_kg}">
+                      <div class="flex justify-between font-semibold">
+                        <span>${s.nama}</span>
+                        <span>Stok Catatan: ${s.stok_kg} kg</span>
+                      </div>
+                      <div class="mt-2 flex items-center gap-2">
+                        <label class="text-xs">Berat Pengepul (kg):</label>
+                        <input type="number" step="0.01" min="0" max="${s.stok_kg + 5}" placeholder="Kosongkan jika tidak dijual"
+                          class="berat-pengepul border rounded px-2 py-1 w-36 text-sm" />
+                      </div>
+                    </div>
+                  `).join('')}
+                </div>
+                <button type="submit" class="w-full bg-emerald-600 text-white font-bold py-2 rounded-lg hover:bg-emerald-700">
+                  Simpan Penjualan & Hitung Susut
+                </button>
+              </form>
+            `}
+          </div>
+
+          <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+            <h4 class="font-bold text-slate-800 mb-3">Riwayat Penjualan & Susut Gudang</h4>
+            <div class="space-y-3 text-xs">
+              ${state.penjualan.slice().reverse().map(p => `
+                <div class="p-3 bg-slate-50 rounded border">
+                  <div class="flex justify-between font-bold">
+                    <span>${p.id} · ${new Date(p.tanggal).toLocaleDateString('id-ID')}</span>
+                    <span class="text-slate-600">${p.ketua}</span>
+                  </div>
+                  <ul class="mt-2 space-y-1">
+                    ${p.items.map(i => `
+                      <li>• ${i.nama_jenis}: Catatan <strong>${i.berat_catatan} kg</strong> → Pengepul <strong>${i.berat_pengepul} kg</strong> (Susut: <span class="text-red-600 font-bold">${i.susut} kg</span>)</li>
+                    `).join('')}
+                  </ul>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function simpanPenjualan(e) {
+      e.preventDefault();
+      const tgl = document.getElementById('jualTanggal').value;
+      const items = [];
+
+      document.querySelectorAll('.jual-row').forEach(row => {
+        const val = row.querySelector('.berat-pengepul').value;
+        if (val !== '' && parseFloat(val) >= 0) {
+          const id_jenis = parseInt(row.getAttribute('data-jenis'));
+          const nama_jenis = row.getAttribute('data-nama');
+          const berat_catatan = parseFloat(row.getAttribute('data-catatan'));
+          const berat_pengepul = parseFloat(val);
+          const susut = +(berat_catatan - berat_pengepul).toFixed(2);
+          items.push({ id_jenis, nama_jenis, berat_catatan, berat_pengepul, susut });
+        }
+      });
+
+      if (items.length === 0) {
+        alert('Isi minimal satu berat timbang ulang pengepul.');
+        return;
+      }
+
+      state.penjualan.push({
+        id: 'PJL-' + (3001 + state.penjualan.length),
+        tanggal: new Date(tgl).toISOString(),
+        bulan: tgl.slice(0, 7),
+        ketua: currentUser.nama,
+        items
+      });
+      saveState();
+      alert('Penjualan ke pengepul & catatan susut berhasil disimpan!');
+      renderTabContent();
+    }
+
+    function viewKoreksiTransaksi() {
+      return `
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 space-y-6">
+          <div>
+            <h3 class="font-bold text-lg text-slate-800">Koreksi Transaksi (Audit Trail)</h3>
+            <p class="text-xs text-slate-500">Data asli tidak dihapus demi transparansi, tetapi efeknya pada saldo dan stok ditiadakan dengan penanda koreksi.</p>
+          </div>
+
+          <div>
+            <h4 class="font-semibold text-sm mb-2">Transaksi Setoran</h4>
+            <table class="w-full text-xs text-left border-collapse">
+              <thead><tr class="bg-slate-100 border-b"><th class="p-2">Kode</th><th class="p-2">Nasabah</th><th class="p-2">Netto</th><th class="p-2">Status</th><th class="p-2">Aksi</th></tr></thead>
+              <tbody>
+                ${state.setoran.map(s => {
+                  const n = state.nasabah.find(x => x.id === s.id_nasabah);
+                  return `
+                    <tr class="border-b">
+                      <td class="p-2 font-mono">${s.id}</td>
+                      <td class="p-2">${n ? n.nama : '-'}</td>
+                      <td class="p-2">${formatRp(s.netto_90)}</td>
+                      <td class="p-2">${s.dikoreksi ? `<span class="text-red-600">Dikoreksi: ${s.alasan_koreksi}</span>` : 'Aktif'}</td>
+                      <td class="p-2">${s.dikoreksi ? '-' : `<button onclick="koreksiItem('setoran', '${s.id}')" class="bg-red-600 text-white px-2 py-1 rounded">Koreksi</button>`}</td>
+                    </tr>
+                  `;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
+
+          <div>
+            <h4 class="font-semibold text-sm mb-2">Transaksi Penarikan</h4>
+            <table class="w-full text-xs text-left border-collapse">
+              <thead><tr class="bg-slate-100 border-b"><th class="p-2">Kode</th><th class="p-2">Nasabah</th><th class="p-2">Jumlah</th><th class="p-2">Status</th><th class="p-2">Aksi</th></tr></thead>
+              <tbody>
+                ${state.penarikan.map(t => {
+                  const n = state.nasabah.find(x => x.id === t.id_nasabah);
+                  return `
+                    <tr class="border-b">
+                      <td class="p-2 font-mono">${t.id}</td>
+                      <td class="p-2">${n ? n.nama : '-'}</td>
+                      <td class="p-2">${formatRp(t.jumlah)}</td>
+                      <td class="p-2">${t.dikoreksi ? `<span class="text-red-600">Dikoreksi: ${t.alasan_koreksi}</span>` : 'Aktif'}</td>
+                      <td class="p-2">${t.dikoreksi ? '-' : `<button onclick="koreksiItem('penarikan', '${t.id}')" class="bg-red-600 text-white px-2 py-1 rounded">Koreksi</button>`}</td>
+                    </tr>
+                  `;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    function koreksiItem(tipe, id) {
+      const alasan = prompt('Masukkan alasan koreksi transaksi ini (wajib diisi):');
+      if (!alasan || !alasan.trim()) return;
+      const list = tipe === 'setoran' ? state.setoran : state.penarikan;
+      const item = list.find(x => x.id === id);
+      if (item && !item.dikoreksi) {
+        item.dikoreksi = true;
+        item.alasan_koreksi = alasan.trim();
+        saveState();
+        renderTabContent();
+      }
+    }
+
+    function viewLaporanBulanan() {
+      const bulan = getCurrentMonth();
+      const setoranBulan = state.setoran.filter(s => s.bulan === bulan && !s.dikoreksi);
+      const penarikanBulan = state.penarikan.filter(t => t.bulan === bulan && !t.dikoreksi);
+      const penjualanBulan = state.penjualan.filter(p => p.bulan === bulan);
+
+      const totalBruto = setoranBulan.reduce((a, b) => a + b.bruto, 0);
+      const totalKas = setoranBulan.reduce((a, b) => a + b.kas_10, 0);
+      const totalNetto = setoranBulan.reduce((a, b) => a + b.netto_90, 0);
+      const totalTarik = penarikanBulan.reduce((a, b) => a + b.jumlah, 0);
+      const totalSusut = penjualanBulan.flatMap(p => p.items).reduce((a, i) => a + i.susut, 0);
+
+      return `
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+          <div class="flex justify-between items-center border-b pb-4 mb-4">
+            <div>
+              <h3 class="font-bold text-xl text-slate-800">Laporan Bulanan Bank Sampah Lestari</h3>
+              <p class="text-xs text-slate-500">Kelurahan Airmadidi · Periode: ${bulan} (Untuk Rapat Kelurahan)</p>
+            </div>
+            <button onclick="window.print()" class="no-print bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-emerald-800">
+              Cetak / Simpan PDF
+            </button>
+          </div>
+
+          <div class="grid sm:grid-cols-2 gap-4 text-sm mb-6">
+            <div class="p-4 bg-slate-50 rounded border">
+              <p class="text-slate-500">Total Setoran Kotor (Bruto)</p>
+              <p class="text-lg font-bold">${formatRp(totalBruto)}</p>
+            </div>
+            <div class="p-4 bg-slate-50 rounded border">
+              <p class="text-slate-500">Kas Operasional Bulan Ini (10%)</p>
+              <p class="text-lg font-bold text-amber-700">${formatRp(totalKas)}</p>
+            </div>
+            <div class="p-4 bg-slate-50 rounded border">
+              <p class="text-slate-500">Tabungan Nasabah Masuk (90%)</p>
+              <p class="text-lg font-bold text-emerald-700">${formatRp(totalNetto)}</p>
+            </div>
+            <div class="p-4 bg-slate-50 rounded border">
+              <p class="text-slate-500">Total Penarikan Dana Nasabah</p>
+              <p class="text-lg font-bold text-purple-700">${formatRp(totalTarik)}</p>
+            </div>
+          </div>
+
+          <p class="text-sm font-semibold mb-2">Total Susut Penjualan ke Pengepul Bulan Ini: <span class="text-red-600">${totalSusut.toFixed(2)} kg</span></p>
+          <p class="text-xs text-slate-500 mt-6">Dicetak oleh: ${currentUser.nama} (${currentUser.role})</p>
+        </div>
+      `;
+    }
+
+    function viewKelolaAkun() {
+      return `
+        <div class="grid md:grid-cols-3 gap-6">
+          <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+            <h3 class="font-bold text-slate-800 mb-3">Tambah Akun Pengurus</h3>
+            <form onsubmit="tambahAkunPengurus(event)" class="space-y-3 text-sm">
+              <div>
+                <label class="block text-xs font-semibold mb-1">Nama Pengurus</label>
+                <input id="pNama" type="text" required placeholder="Nama lengkap" class="w-full border rounded px-3 py-2" />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold mb-1">Username Login</label>
+                <input id="pUser" type="text" required placeholder="Username unik" class="w-full border rounded px-3 py-2" />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold mb-1">Peran (Role)</label>
+                <select id="pRole" class="w-full border rounded px-3 py-2">
+                  <option value="Petugas Timbang">Petugas Timbang</option>
+                  <option value="Bendahara">Bendahara</option>
+                  <option value="Ketua">Ketua</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold mb-1">Kata Sandi Awal</label>
+                <input id="pPass" type="password" required placeholder="Minimal 4 karakter" class="w-full border rounded px-3 py-2" />
+              </div>
+              <button type="submit" class="w-full bg-emerald-600 text-white font-semibold py-2 rounded-lg hover:bg-emerald-700">
+                Simpan Akun
+              </button>
+            </form>
+          </div>
+
+          <div class="md:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+            <h3 class="font-bold text-lg mb-4">Daftar Akun Pengurus Sistem</h3>
+            <table class="w-full text-sm text-left border-collapse">
+              <thead>
+                <tr class="bg-slate-100 border-b">
+                  <th class="p-2.5">Nama</th>
+                  <th class="p-2.5">Username</th>
+                  <th class="p-2.5">Peran</th>
+                  <th class="p-2.5">Status</th>
+                  <th class="p-2.5">Aksi</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${state.users.map(u => `
+                  <tr class="border-b">
+                    <td class="p-2.5 font-medium">${u.nama}</td>
+                    <td class="p-2.5 font-mono">${u.username}</td>
+                    <td class="p-2.5">${u.role}</td>
+                    <td class="p-2.5">${u.aktif ? 'Aktif' : 'Nonaktif'}</td>
+                    <td class="p-2.5">
+                      ${u.username === 'ketua' ? '<span class="text-xs text-slate-400">Utama</span>' : `
+                        <button onclick="toggleAkun(${u.id})" class="text-xs underline text-blue-600">
+                          ${u.aktif ? 'Nonaktifkan' : 'Aktifkan'}
+                        </button>
+                      `}
+                    </td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    function tambahAkunPengurus(e) {
+      e.preventDefault();
+      const nama = document.getElementById('pNama').value.trim();
+      const username = document.getElementById('pUser').value.trim();
+      const role = document.getElementById('pRole').value;
+      const password = document.getElementById('pPass').value.trim();
+
+      if (state.users.some(u => u.username.toLowerCase() === username.toLowerCase())) {
+        alert('Username sudah digunakan!');
+        return;
+      }
+
+      state.users.push({
+        id: state.users.length + 1,
+        nama,
+        username,
+        password,
+        role,
+        aktif: true
+      });
+      saveState();
+      renderTabContent();
+    }
+
+    function toggleAkun(id) {
+      const u = state.users.find(x => x.id === id);
+      if (u) {
+        u.aktif = !u.aktif;
+        saveState();
+        renderTabContent();
+      }
+    }
+
+    renderApp();
+  </script>
+</body>
+</html>
